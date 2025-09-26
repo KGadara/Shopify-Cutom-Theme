@@ -1,0 +1,819 @@
+{% doc %}
+  @prompt
+    Create a Shopify theme section called "Linked Variations" that displays related products as selectable buttons. Each variation should be a block with a product picker, optional custom label, and customizable colors (background, active background, text color, active text color). The current product should be marked as active with distinct styling. Use a responsive flex container that wraps on mobile. Include inline styles or CSS variables for per-button color customization. Generate clean HTML structure with proper Liquid schema for Theme Editor compatibility., adjust it to be for flavors pick, I need to be able to chose multi products and make it as a color swatch, The Custom label should also work and Each flavor is represented by a circular icon, providing a clean and modern aesthetic. The circles are color-coded to match the flavor, making it easy for customers to identify their choices at a glance., The Desgin should be like this :
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Whey Protein Flavor Selector</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            .flavor-circle {
+                width: 80px;
+                height: 80px;
+                border-radius: 50%;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background-size: cover;
+                background-position: center;
+            }
+            .flavor-circle:hover {
+                transform: scale(1.1);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+            .flavor-circle.selected {
+                border: 3px solid #3B82F6;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50">
+        <div class="max-w-4xl mx-auto p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Shopify Whey Protein Flavor Selector</h1>
+            
+            <div class="bg-white rounded-xl shadow-md overflow-hidden p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Choose Your Flavor:</h2>
+                <div class="flex flex-wrap gap-5 justify-center">
+                    <div class="flavor-circle selected" 
+                         style="background-color: #4B2C20;"
+                         data-flavor="Chocolate"
+                         data-url="/products/chocolate-whey-protein"
+                         title="Rich Chocolate">
+                        <img src="https://placehold.co/80x80/4B2C20/FFFF
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .flavor-selector-container-{{ ai_gen_id }} {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: {{ block.settings.container_padding }}px;}
+
+  .flavor-selector-card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    margin-bottom: {{ block.settings.card_margin }}px;
+  }
+
+  .flavor-selector-heading-{{ ai_gen_id }} {
+    margin: 0 0 {{ block.settings.title_spacing }}px 0;
+  }
+
+  .flavor-selector-title-{{ ai_gen_id }} {
+    color: {{ block.settings.title_color }};
+    margin: 0;
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .flavor-grid-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ block.settings.flavor_gap }}px;
+    justify-content: {{ block.settings.alignment }};
+  }
+
+  .flavor-circle-{{ ai_gen_id }} {
+    width: {{ block.settings.circle_size }}px;
+    height: {{ block.settings.circle_size }}px;
+    border-radius:50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};background-color: var(--flavor-color);}
+
+  .flavor-circle-{{ ai_gen_id }}:hover {
+    transform: scale({{ block.settings.hover_scale }});
+    box-shadow: 0 4px 12px rgba(0, 0, 0, {{ block.settings.hover_shadow_opacity }});
+  }
+
+  .flavor-circle-{{ ai_gen_id }}.selected {
+    border: {{ block.settings.selected_border_width }}px solid {{ block.settings.selected_border_color }};box-shadow: 0 4px 12px {{ block.settings.selected_shadow_color }};
+    transform: scale({{ block.settings.selected_scale }});
+  }
+
+  .flavor-label-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: -{{ block.settings.label_offset }}px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: {{ block.settings.label_background }};
+    color: {{ block.settings.label_color }};
+    padding: {{ block.settings.label_padding_y }}px {{ block.settings.label_padding_x }}px;
+    border-radius: {{ block.settings.label_border_radius }}px;
+    font-family: {{ settings.text_font.family }}, {{ settings.text_font.fallback_families }};
+    font-style: {{ settings.text_font.style }};
+    font-weight: {{ settings.text_font.weight }};
+    font-size: {{ block.settings.label_font_size }}px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;pointer-events: none;z-index: 5;
+  }
+
+  .flavor-circle-{{ ai_gen_id }}:hover .flavor-label-{{ ai_gen_id }} {
+    opacity: 1;
+  }
+
+  .flavor-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .flavor-name-{{ ai_gen_id }} {
+    margin-top: {{ block.settings.name_spacing }}px;
+    font-family: {{ settings.text_font.family }}, {{ settings.text_font.fallback_families }};
+    font-style: {{ settings.text_font.style }};
+    font-weight: {{ settings.text_font.weight }};
+    font-size: {{ block.settings.name_font_size }}px;
+    color: {{ block.settings.name_color }};
+    text-align: center;
+  }
+
+  @media screen and (max-width: 749px) {
+    .flavor-selector-container-{{ ai_gen_id }} {
+      padding: {{ block.settings.container_padding | divided_by: 2 }}px;
+    }
+
+    .flavor-selector-card-{{ ai_gen_id }} {
+      padding: {{ block.settings.card_padding | divided_by: 1.5 }}px;
+    }
+
+    .flavor-circle-{{ ai_gen_id }} {
+      width: {{ block.settings.circle_size | times: 0.8 }}px;
+      height: {{ block.settings.circle_size | times: 0.8 }}px;
+    }
+
+    .flavor-grid-{{ ai_gen_id }} {
+      gap: {{ block.settings.flavor_gap | divided_by: 1.5 }}px;
+      justify-content: center;
+    }
+
+    .flavor-selector-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | minus: 4 }}px;
+    }
+  }
+{% endstyle %}
+
+<flavor-selector-{{ ai_gen_id }} class="flavor-selector-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="flavor-selector-card-{{ ai_gen_id }}">
+    {% if block.settings.title != blank %}
+      <div class="flavor-selector-heading-{{ ai_gen_id }}">
+        <h2 class="flavor-selector-title-{{ ai_gen_id }}">{{ block.settings.title }}</h2>
+      </div>
+    {% endif %}
+    <div class="flavor-grid-{{ ai_gen_id }}">
+      {% assign current_product = product %}
+      
+      {% for i in (1..12) %}
+        {% assign product_key = 'product_' | append: i %}
+        {% assign label_key = 'label_' | append: i %}
+        {% assign color_key = 'color_' | append: i %}
+        {% if block.settings[product_key] != blank %}
+          {% assign flavor_product = block.settings[product_key] %}
+          {% assign is_current = false %}
+          {% if current_product.id == flavor_product.id %}
+            {% assign is_current = true %}
+          {% endif %}
+          
+          {% assign flavor_color = block.settings[color_key] %}
+          {% assign custom_label = block.settings[label_key] %}
+          {% assign display_name = custom_label | default: flavor_product.title %}<div class="flavor-wrapper-{{ ai_gen_id }}"><a 
+              href="{{ flavor_product.url }}" 
+              class="flavor-circle-{{ ai_gen_id }}{% if is_current %} selected{% endif %}"
+              style="--flavor-color: {{ flavor_color }};"data-flavor="{{ display_name | escape }}"
+              data-product-id="{{ flavor_product.id }}"{% if is_current %}aria-current="page"{% endif %}
+              title="{{ display_name | escape }}"
+            >
+              {% if block.settings.show_hover_labels %}
+                <div class="flavor-label-{{ ai_gen_id }}">
+                  {{ display_name }}
+                </div>
+              {% endif %}</a>
+            {% if block.settings.show_flavor_names %}
+              <div class="flavor-name-{{ ai_gen_id }}">
+                {{ display_name }}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</flavor-selector-{{ ai_gen_id }}><script>
+  (function() {
+    class FlavorSelector{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.flavorCircles = this.querySelectorAll('.flavor-circle-{{ ai_gen_id }}');
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        this.flavorCircles.forEach((circle) => {
+          circle.addEventListener('click', (e) => {
+            this.handleFlavorSelection(circle);
+          });
+        });
+      }
+
+      handleFlavorSelection(selectedCircle) {
+        this.flavorCircles.forEach((circle) => {
+          circle.classList.remove('selected');
+          circle.removeAttribute('aria-current');
+        });
+        selectedCircle.classList.add('selected');
+        selectedCircle.setAttribute('aria-current', 'page');
+        const flavorName = selectedCircle.dataset.flavor;
+        const productId = selectedCircle.dataset.productId;
+        
+        this.dispatchEvent(new CustomEvent('flavorSelected', {
+          detail: {
+            flavorName: flavorName,
+            productId: productId,
+            element: selectedCircle
+          },
+          bubbles: true
+        }));
+      }}
+
+    customElements.define('flavor-selector-{{ ai_gen_id }}', FlavorSelector{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Flavor Selector",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "General Settings"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section title",
+      "default": "Choose Your Flavor:"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "label": "Title size",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "title_spacing",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Title bottom spacing",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Card Style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Card border radius",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "min": 16,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Card padding",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_margin",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Card bottom margin",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "container_padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Container padding",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Flavor Circles"
+    },
+    {
+      "type": "range",
+      "id": "circle_size",
+      "min": 20,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Circle size",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "flavor_gap",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Space between circles",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_flavor_names",
+      "label": "Show flavor names below circles",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_hover_labels",
+      "label": "Show hover labels",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Circle Borders"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Default border width",
+      "default": 2
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Default border color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "range",
+      "id": "selected_border_width",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Selected border width",
+      "default": 3
+    },
+    {
+      "type": "color",
+      "id": "selected_border_color",
+      "label": "Selected border color",
+      "default": "#3B82F6"
+    },
+    {
+      "type": "color",
+      "id": "selected_shadow_color",
+      "label": "Selected shadow color",
+      "default": "rgba(59, 130, 246, 0.3)"
+    },
+    {
+      "type": "header",
+      "content": "Hover Effects"
+    },
+    {
+      "type": "range",
+      "id": "hover_scale",
+      "min": 1.0,
+      "max": 1.3,
+      "step": 0.1,
+      "label": "Hover scale",
+      "default": 1.1
+    },
+    {
+      "type": "range",
+      "id": "selected_scale",
+      "min": 1.0,
+      "max": 1.3,
+      "step": 0.1,
+      "label": "Selected scale",
+      "default": 1.0
+    },
+    {
+      "type": "range",
+      "id": "hover_shadow_opacity",
+      "min": 0.0,
+      "max": 0.5,
+      "step": 0.1,
+      "label": "Hover shadow opacity",
+      "default": 0.2
+    },
+    {
+      "type": "header",
+      "content": "Flavor Names"
+    },
+    {
+      "type": "range",
+      "id": "name_spacing",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Name top spacing",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "name_font_size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "label": "Name font size",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "name_color",
+      "label": "Name color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "Hover Labels"
+    },
+    {
+      "type": "range",
+      "id": "label_offset",
+      "min": 20,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Label offset from circle",
+      "default": 30
+    },
+    {
+      "type": "color",
+      "id": "label_background",
+      "label": "Label background",
+      "default": "#1f2937"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Label text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "label_padding_x",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Label horizontal padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "label_padding_y",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "label": "Label vertical padding",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "label_border_radius",
+      "min": 0,
+      "max": 12,
+      "step": 2,
+      "unit": "px",
+      "label": "Label border radius",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "label_font_size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "label": "Label font size",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Product1"
+    },
+    {
+      "type": "product",
+      "id": "product_1",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_1",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_1",
+      "label": "Flavor color",
+      "default": "#4B2C20"
+    },
+    {
+      "type": "header",
+      "content": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "product_2",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_2",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_2",
+      "label": "Flavor color",
+      "default": "#F3E5AB"
+    },
+    {
+      "type": "header",
+      "content": "Product 3"
+    },
+    {
+      "type": "product",
+      "id": "product_3",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_3",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_3",
+      "label": "Flavor color",
+      "default": "#FF69B4"
+    },
+    {
+      "type": "header",
+      "content": "Product 4"
+    },
+    {
+      "type": "product",
+      "id": "product_4",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_4",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_4",
+      "label": "Flavor color",
+      "default": "#32CD32"
+    },
+    {
+      "type": "header",
+      "content": "Product 5"
+    },
+    {
+      "type": "product",
+      "id": "product_5",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_5",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_5",
+      "label": "Flavor color",
+      "default": "#FF4500"
+    },
+    {
+      "type": "header",
+      "content": "Product 6"
+    },
+    {
+      "type": "product",
+      "id": "product_6",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_6",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_6",
+      "label": "Flavor color",
+      "default": "#8A2BE2"
+    },
+    {
+      "type": "header",
+      "content": "Product 7"
+    },
+    {
+      "type": "product",
+      "id": "product_7",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_7",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_7",
+      "label": "Flavor color",
+      "default": "#DC143C"
+    },
+    {
+      "type": "header",
+      "content": "Product 8"
+    },
+    {
+      "type": "product",
+      "id": "product_8",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_8",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_8",
+      "label": "Flavor color",
+      "default": "#FFD700"
+    },
+    {
+      "type": "header",
+      "content": "Product 9"
+    },
+    {
+      "type": "product",
+      "id": "product_9",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_9",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_9",
+      "label": "Flavor color",
+      "default": "#00CED1"
+    },
+    {
+      "type": "header",
+      "content": "Product 10"
+    },
+    {
+      "type": "product",
+      "id": "product_10",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_10",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_10",
+      "label": "Flavor color",
+      "default": "#FF1493"
+    },
+    {
+      "type": "header",
+      "content": "Product 11"
+    },
+    {
+      "type": "product",
+      "id": "product_11",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_11",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_11",
+      "label": "Flavor color",
+      "default": "#228B22"
+    },
+    {
+      "type": "header",
+      "content": "Product 12"
+    },
+    {
+      "type": "product",
+      "id": "product_12",
+      "label": "Product"
+    },
+    {
+      "type": "text",
+      "id": "label_12",
+      "label": "Custom label"
+    },
+    {
+      "type": "color",
+      "id": "color_12",
+      "label": "Flavor color",
+      "default": "#B8860B"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Flavor Selector"
+    }
+  ]
+}
+{% endschema %}

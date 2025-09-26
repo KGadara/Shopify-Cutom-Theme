@@ -1,0 +1,896 @@
+{% doc %}
+  @prompt
+    Create a "How do you use it?" instructional section with 3 numbered steps. Each step should have an image placeholder, a title, and descriptive text below. The layout should be in a horizontal row with equal spacing. Include step numbers in circular badges (1, 2, 3) positioned in the top right of each step's image area. The section should have a centered main heading "How do you use it?" and be suitable for explaining product usage instructions., add animations, no, remove the animation and give me an option to change the font., make it interacting with the user, remove the steps bar and make it only interact when the user hovers over it, make animation options, please ensure the animations is working
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-instructions-section-{{ ai_gen_id }} {
+    padding: {{ block.settings.section_padding }}px 0;
+    background-color: {{ block.settings.background_color }};
+  }
+
+  .ai-instructions-container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .ai-instructions-heading-{{ ai_gen_id }} {
+    text-align: center;
+    margin: 0 0 {{ block.settings.heading_bottom_spacing }}px;
+    color: {{ block.settings.heading_color }};
+    font-size: {{ block.settings.heading_size }}px;
+    font-weight: 600;
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-style: {{ block.settings.heading_font.style }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    {% if block.settings.enable_animations %}
+      opacity: 0;
+      transform: translateY(30px);
+      animation: ai-fade-in-up-{{ ai_gen_id }} {{ block.settings.animation_duration }}s ease-out {{ block.settings.animation_delay }}s forwards;
+    {% endif %}
+  }
+
+  .ai-instructions-steps-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: {{ block.settings.step_spacing }}px;
+    align-items: start;
+  }
+
+  .ai-instructions-step-{{ ai_gen_id }} {
+    text-align: center;
+    border-radius: {{ block.settings.step_border_radius }}px;
+    padding: {{ block.settings.step_padding }}px;
+    background-color: {{ block.settings.step_background_color }};
+    border: 2px solid transparent;
+    {% if block.settings.enable_hover_effects %}
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    {% endif %}
+    {% if block.settings.enable_animations %}
+      opacity: 0;
+      transform: translateY(50px);
+    {% endif %}
+    {% if block.settings.enable_floating_animation %}
+      animation: ai-float-{{ ai_gen_id }} {{ block.settings.float_duration }}s ease-in-out infinite;
+    {% endif %}
+  }
+
+  {% if block.settings.enable_animations %}
+    .ai-instructions-step-{{ ai_gen_id }}:nth-child(1) {
+      animation: ai-fade-in-up-{{ ai_gen_id }} {{ block.settings.animation_duration }}s ease-out {{ block.settings.animation_delay | plus: 0.2 }}s forwards{% if block.settings.enable_floating_animation %}, ai-float-{{ ai_gen_id }} {{ block.settings.float_duration }}s ease-in-out {{ block.settings.animation_delay | plus: block.settings.animation_duration | plus: 0.2 }}s infinite{% endif %};
+    }
+    .ai-instructions-step-{{ ai_gen_id }}:nth-child(2) {
+      animation: ai-fade-in-up-{{ ai_gen_id }} {{ block.settings.animation_duration }}s ease-out {{ block.settings.animation_delay | plus: 0.4 }}s forwards{% if block.settings.enable_floating_animation %}, ai-float-{{ ai_gen_id }} {{ block.settings.float_duration }}s ease-in-out {{ block.settings.animation_delay | plus: block.settings.animation_duration | plus: 0.4 | plus: block.settings.float_duration | divided_by: 3 }}s infinite{% endif %};
+    }
+    .ai-instructions-step-{{ ai_gen_id }}:nth-child(3) {
+      animation: ai-fade-in-up-{{ ai_gen_id }} {{ block.settings.animation_duration }}s ease-out {{ block.settings.animation_delay | plus: 0.6 }}s forwards{% if block.settings.enable_floating_animation %}, ai-float-{{ ai_gen_id }} {{ block.settings.float_duration }}s ease-in-out {{ block.settings.animation_delay | plus: block.settings.animation_duration | plus: 0.6 | plus: block.settings.float_duration | divided_by: 1.5 }}s infinite{% endif %};
+    }
+  {% elsif block.settings.enable_floating_animation %}
+    .ai-instructions-step-{{ ai_gen_id }}:nth-child(2) {
+      animation-delay: {{ block.settings.float_duration | divided_by: 3 }}s;
+    }
+    .ai-instructions-step-{{ ai_gen_id }}:nth-child(3) {
+      animation-delay: {{ block.settings.float_duration | divided_by: 1.5 }}s;
+    }
+  {% endif %}
+
+  {% if block.settings.enable_hover_effects %}
+    .ai-instructions-step-{{ ai_gen_id }}:hover {
+      transform: translateY(-{{ block.settings.hover_lift }}px);
+      box-shadow: 0 {{ block.settings.hover_shadow }}px {{ block.settings.hover_shadow | times: 2 }}px rgba(0, 0, 0, 0.1);
+      border-color: {{ block.settings.step_hover_border_color }};
+      background-color: {{ block.settings.step_hover_background_color }};
+    }
+  {% endif %}
+
+  .ai-instructions-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    margin-bottom: {{ block.settings.image_bottom_spacing }}px;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    overflow: hidden;
+    background-color: {{ block.settings.image_background_color }};
+    aspect-ratio: {{ block.settings.image_aspect_ratio }};
+    {% if block.settings.enable_hover_effects %}
+      transition: transform 0.3s ease;
+    {% endif %}
+  }
+
+  {% if block.settings.enable_hover_effects %}
+    .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-image-wrapper-{{ ai_gen_id }} {
+      transform: scale({{ block.settings.image_hover_scale }});
+    }
+  {% endif %}
+
+  .ai-instructions-image-wrapper-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-instructions-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-instructions-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+    {% if block.settings.enable_hover_effects %}
+      transition: opacity 0.3s ease;
+    {% endif %}
+  }
+
+  {% if block.settings.enable_hover_effects %}
+    .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-image-placeholder-{{ ai_gen_id }} svg {
+      opacity: 0.5;
+    }
+  {% endif %}
+
+  .ai-instructions-step-badge-{{ ai_gen_id }} {
+    position: absolute;
+    top: {{ block.settings.badge_offset }}px;
+    right: {{ block.settings.badge_offset }}px;
+    width: {{ block.settings.badge_size }}px;
+    height: {{ block.settings.badge_size }}px;
+    background-color: {{ block.settings.badge_color }};
+    color: {{ block.settings.badge_text_color }};
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: {{ block.settings.badge_font_size }}px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    font-family: {{ block.settings.text_font.family }}, {{ block.settings.text_font.fallback_families }};
+    font-style: {{ block.settings.text_font.style }};
+    font-weight: {{ block.settings.text_font.weight }};
+    {% if block.settings.enable_hover_effects %}
+      transition: transform 0.3s ease, background-color 0.3s ease;
+    {% endif %}
+    {% if block.settings.enable_badge_pulse %}
+      animation: ai-pulse-{{ ai_gen_id }} {{ block.settings.pulse_duration }}s ease-in-out infinite;
+    {% endif %}
+  }
+
+  {% if block.settings.enable_hover_effects %}
+    .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-step-badge-{{ ai_gen_id }} {
+      transform: scale(1.1);
+      background-color: {{ block.settings.badge_hover_color }};
+    }
+  {% endif %}
+
+  .ai-instructions-step-title-{{ ai_gen_id }} {
+    margin: 0 0 {{ block.settings.title_bottom_spacing }}px;
+    color: {{ block.settings.step_title_color }};
+    font-size: {{ block.settings.step_title_size }}px;
+    font-weight: 600;
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-style: {{ block.settings.heading_font.style }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    {% if block.settings.enable_hover_effects %}
+      transition: color 0.3s ease;
+    {% endif %}
+  }
+
+  {% if block.settings.enable_hover_effects %}
+    .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-step-title-{{ ai_gen_id }} {
+      color: {{ block.settings.step_title_hover_color }};
+    }
+  {% endif %}
+
+  .ai-instructions-step-text-{{ ai_gen_id }} {
+    margin: 0;
+    color: {{ block.settings.step_text_color }};
+    font-size: {{ block.settings.step_text_size }}px;
+    line-height: 1.5;
+    font-family: {{ block.settings.text_font.family }}, {{ block.settings.text_font.fallback_families }};
+    font-style: {{ block.settings.text_font.style }};
+    font-weight: {{ block.settings.text_font.weight }};
+    {% if block.settings.enable_hover_effects %}
+      transition: color 0.3s ease;
+    {% endif %}
+    opacity: 0.8;
+  }
+
+  {% if block.settings.enable_hover_effects %}
+    .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-step-text-{{ ai_gen_id }} {
+      color: {{ block.settings.step_text_hover_color }};
+      opacity: 1;
+    }
+  {% endif %}
+
+  @keyframes ai-fade-in-up-{{ ai_gen_id }} {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes ai-float-{{ ai_gen_id }} {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-{{ block.settings.float_distance }}px);
+    }
+  }
+
+  @keyframes ai-pulse-{{ ai_gen_id }} {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale({{ block.settings.pulse_scale }});
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-instructions-steps-{{ ai_gen_id }} {
+      grid-template-columns: 1fr;
+      gap: {{ block.settings.mobile_step_spacing }}px;
+    }
+
+    .ai-instructions-container-{{ ai_gen_id }} {
+      padding: 0 16px;
+    }
+
+    .ai-instructions-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.heading_size | times: 0.8 }}px;
+    }
+
+    .ai-instructions-step-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.step_title_size | times: 0.9 }}px;
+    }
+
+    .ai-instructions-step-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.step_text_size | times: 0.9 }}px;
+    }
+
+    {% if block.settings.disable_mobile_hover %}
+      .ai-instructions-step-{{ ai_gen_id }}:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: transparent;
+        background-color: {{ block.settings.step_background_color }};
+      }
+
+      .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-image-wrapper-{{ ai_gen_id }} {
+        transform: none;
+      }
+
+      .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-step-badge-{{ ai_gen_id }} {
+        transform: none;
+        background-color: {{ block.settings.badge_color }};
+      }
+
+      .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-step-title-{{ ai_gen_id }} {
+        color: {{ block.settings.step_title_color }};
+      }
+
+      .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-step-text-{{ ai_gen_id }} {
+        color: {{ block.settings.step_text_color }};
+        opacity: 0.8;
+      }
+
+      .ai-instructions-step-{{ ai_gen_id }}:hover .ai-instructions-image-placeholder-{{ ai_gen_id }} svg {
+        opacity: 0.3;
+      }
+    {% endif %}
+
+    {% if block.settings.disable_mobile_animations %}
+      .ai-instructions-step-{{ ai_gen_id }} {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .ai-instructions-heading-{{ ai_gen_id }} {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .ai-instructions-step-badge-{{ ai_gen_id }} {
+        animation: none !important;
+      }
+    {% endif %}
+  }
+
+  @media screen and (max-width: 1024px) and (min-width: 769px) {
+    .ai-instructions-steps-{{ ai_gen_id }} {
+      gap: {{ block.settings.step_spacing | times: 0.7 }}px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ai-instructions-step-{{ ai_gen_id }},
+    .ai-instructions-heading-{{ ai_gen_id }},
+    .ai-instructions-step-badge-{{ ai_gen_id }},
+    .ai-instructions-image-wrapper-{{ ai_gen_id }},
+    .ai-instructions-image-placeholder-{{ ai_gen_id }} svg,
+    .ai-instructions-step-title-{{ ai_gen_id }},
+    .ai-instructions-step-text-{{ ai_gen_id }} {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .ai-instructions-step-{{ ai_gen_id }} {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .ai-instructions-heading-{{ ai_gen_id }} {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+{% endstyle %}
+
+<div
+  class="ai-instructions-section-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-instructions-container-{{ ai_gen_id }}">
+    {% if block.settings.main_heading != blank %}
+      <h2 class="ai-instructions-heading-{{ ai_gen_id }}">{{ block.settings.main_heading }}</h2>
+    {% endif %}
+
+    <div class="ai-instructions-steps-{{ ai_gen_id }}">
+      {% for i in (1..3) %}
+        {% liquid
+          assign step_image_key = 'step_' | append: i | append: '_image'
+          assign step_title_key = 'step_' | append: i | append: '_title'
+          assign step_text_key = 'step_' | append: i | append: '_text'
+          assign step_image = block.settings[step_image_key]
+          assign step_title = block.settings[step_title_key]
+          assign step_text = block.settings[step_text_key]
+        %}
+
+        <div class="ai-instructions-step-{{ ai_gen_id }}">
+          <div class="ai-instructions-image-wrapper-{{ ai_gen_id }}">
+            {% if step_image %}
+              <img
+                src="{{ step_image | image_url: width: 600 }}"
+                alt="{{ step_image.alt | escape }}"
+                loading="lazy"
+                width="{{ step_image.width }}"
+                height="{{ step_image.height }}"
+              >
+            {% else %}
+              <div class="ai-instructions-image-placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+            <div class="ai-instructions-step-badge-{{ ai_gen_id }}">{{ i }}</div>
+          </div>
+
+          {% if step_title != blank %}
+            <h3 class="ai-instructions-step-title-{{ ai_gen_id }}">{{ step_title }}</h3>
+          {% endif %}
+
+          {% if step_text != blank %}
+            <div class="ai-instructions-step-text-{{ ai_gen_id }}">{{ step_text }}</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Animated Instructions",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Main Heading"
+    },
+    {
+      "type": "text",
+      "id": "main_heading",
+      "label": "Section heading",
+      "default": "How do you use it?"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Heading size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "heading_bottom_spacing",
+      "min": 20,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Spacing below heading",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Step 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "step_1_image",
+      "label": "Step 1 image"
+    },
+    {
+      "type": "text",
+      "id": "step_1_title",
+      "label": "Step 1 title",
+      "default": "Prepare the product"
+    },
+    {
+      "type": "textarea",
+      "id": "step_1_text",
+      "label": "Step 1 description",
+      "default": "Remove the product from packaging and ensure all components are included."
+    },
+    {
+      "type": "header",
+      "content": "Step 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "step_2_image",
+      "label": "Step 2 image"
+    },
+    {
+      "type": "text",
+      "id": "step_2_title",
+      "label": "Step 2 title",
+      "default": "Follow the instructions"
+    },
+    {
+      "type": "textarea",
+      "id": "step_2_text",
+      "label": "Step 2 description",
+      "default": "Carefully follow the included instructions for optimal results."
+    },
+    {
+      "type": "header",
+      "content": "Step 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "step_3_image",
+      "label": "Step 3 image"
+    },
+    {
+      "type": "text",
+      "id": "step_3_title",
+      "label": "Step 3 title",
+      "default": "Enjoy the results"
+    },
+    {
+      "type": "textarea",
+      "id": "step_3_text",
+      "label": "Step 3 description",
+      "default": "Experience the benefits and enjoy your product to the fullest."
+    },
+    {
+      "type": "header",
+      "content": "Animation Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable entrance animations",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "min": 0.3,
+      "max": 2,
+      "step": 0.1,
+      "unit": "s",
+      "label": "Animation duration",
+      "default": 0.8
+    },
+    {
+      "type": "range",
+      "id": "animation_delay",
+      "min": 0,
+      "max": 2,
+      "step": 0.1,
+      "unit": "s",
+      "label": "Animation start delay",
+      "default": 0.2
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_floating_animation",
+      "label": "Enable floating animation",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "float_duration",
+      "min": 2,
+      "max": 8,
+      "step": 0.5,
+      "unit": "s",
+      "label": "Float animation duration",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "float_distance",
+      "min": 5,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Float distance",
+      "default": 10
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_badge_pulse",
+      "label": "Enable badge pulse animation",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "pulse_duration",
+      "min": 1,
+      "max": 4,
+      "step": 0.5,
+      "unit": "s",
+      "label": "Pulse duration",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "pulse_scale",
+      "min": 1.1,
+      "max": 1.3,
+      "step": 0.1,
+      "label": "Pulse scale",
+      "default": 1.1
+    },
+    {
+      "type": "header",
+      "content": "Hover Effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_effects",
+      "label": "Enable hover effects",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "hover_lift",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Hover lift distance",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "hover_shadow",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Hover shadow size",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "image_hover_scale",
+      "min": 1,
+      "max": 1.2,
+      "step": 0.1,
+      "label": "Image hover scale",
+      "default": 1.1
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_mobile_animations",
+      "label": "Disable animations on mobile",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_mobile_hover",
+      "label": "Disable hover effects on mobile",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "min": 20,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Section padding",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "step_spacing",
+      "min": 20,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "label": "Space between steps",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "mobile_step_spacing",
+      "min": 20,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Mobile space between steps",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "step_padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Step card padding",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "step_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Step card border radius",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image aspect ratio",
+      "options": [
+        {
+          "value": "1/1",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "4/3",
+          "label": "Landscape (4:3)"
+        },
+        {
+          "value": "3/2",
+          "label": "Landscape (3:2)"
+        },
+        {
+          "value": "16/9",
+          "label": "Wide (16:9)"
+        }
+      ],
+      "default": "4/3"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "image_background_color",
+      "label": "Image background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "range",
+      "id": "image_bottom_spacing",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below images",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Step Badges"
+    },
+    {
+      "type": "range",
+      "id": "badge_size",
+      "min": 24,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Badge size",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "badge_offset",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Badge position offset",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge background color",
+      "default": "#3ee851"
+    },
+    {
+      "type": "color",
+      "id": "badge_hover_color",
+      "label": "Badge hover background color",
+      "default": "#1a1a74"
+    },
+    {
+      "type": "color",
+      "id": "badge_text_color",
+      "label": "Badge text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Badge font size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Heading font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "font_picker",
+      "id": "text_font",
+      "label": "Text font",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "color",
+      "id": "step_title_color",
+      "label": "Step title color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "step_title_hover_color",
+      "label": "Step title hover color",
+      "default": "#1a1a74"
+    },
+    {
+      "type": "range",
+      "id": "step_title_size",
+      "min": 16,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "label": "Step title size",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "title_bottom_spacing",
+      "min": 4,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Space below titles",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "step_text_color",
+      "label": "Step text color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "step_text_hover_color",
+      "label": "Step text hover color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "step_text_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Step text size",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "step_background_color",
+      "label": "Step card background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "step_hover_background_color",
+      "label": "Step hover background color",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "step_hover_border_color",
+      "label": "Step hover border color",
+      "default": "#3ee851"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Animated Instructions"
+    }
+  ]
+}
+{% endschema %}

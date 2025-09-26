@@ -1,0 +1,588 @@
+{% doc %}
+  @prompt
+    Create a product page block that displays a button to open a popup modal showing nutritional facts images. The block should read from a file-type product metafield, display a "View Nutritional Facts" button, and when clicked show the metafield image in a responsive modal overlay with a close button. This should be a block that can be added to product page sections, not a standalone section., i need to able to set it to the right with sizing conrol, i need to make it more smaller
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-nutrition-facts-{{ ai_gen_id }} {
+    margin: {{ block.settings.margin_top }}px 0 {{ block.settings.margin_bottom }}px;
+    text-align: {{ block.settings.button_alignment }};
+    max-width: {{ block.settings.container_width }}px;
+    {% if block.settings.button_alignment == 'right' %}
+      margin-left: auto;
+    {% elsif block.settings.button_alignment == 'center' %}
+      margin-left: auto;
+      margin-right: auto;
+    {% endif %}
+  }
+
+  .ai-nutrition-facts-button-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: {{ block.settings.button_padding }}px {{ block.settings.button_padding | times: 1.5 }}px;
+    background-color: {{ block.settings.button_color }};
+    color: {{ block.settings.button_text_color }};
+    border: 1px solid {{ block.settings.button_border_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: {{ block.settings.button_width }}%;
+    max-width: 100%;
+    justify-content: center;
+    min-height: {{ block.settings.button_min_height }}px;
+  }
+
+  .ai-nutrition-facts-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_color }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  .ai-nutrition-facts-button-{{ ai_gen_id }} svg {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    {% if block.settings.hide_icon %}
+      display: none;
+    {% endif %}
+  }
+
+  .ai-nutrition-facts-modal-{{ ai_gen_id }} {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .ai-nutrition-facts-modal-{{ ai_gen_id }}.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-nutrition-facts-modal-content-{{ ai_gen_id }} {
+    position: relative;
+    max-width: {{ block.settings.modal_max_width }}px;
+    max-height: 90vh;
+    width: 100%;
+    background-color: {{ block.settings.modal_background }};
+    border-radius: {{ block.settings.modal_border_radius }}px;
+    padding: {{ block.settings.modal_padding }}px;
+    box-sizing: border-box;
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+    overflow: auto;
+  }
+
+  .ai-nutrition-facts-modal-{{ ai_gen_id }}.active .ai-nutrition-facts-modal-content-{{ ai_gen_id }} {
+    transform: scale(1);
+  }
+
+  .ai-nutrition-facts-modal-header-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: {{ block.settings.show_title | times: 15 }}px;
+    padding-bottom: {{ block.settings.show_title | times: 10 }}px;
+    {% if block.settings.show_title %}
+      border-bottom: 1px solid #e0e0e0;
+    {% endif %}
+  }
+
+  .ai-nutrition-facts-modal-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.modal_title_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.modal_text_color }};
+    margin: 0;
+    {% unless block.settings.show_title %}
+      display: none;
+    {% endunless %}
+  }
+
+  .ai-nutrition-facts-close-button-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: {{ block.settings.modal_text_color }};
+    transition: background-color 0.3s ease;
+    position: {% if block.settings.show_title %}relative{% else %}absolute{% endif %};
+    {% unless block.settings.show_title %}
+      top: 10px;
+      right: 10px;
+      background-color: rgba(255, 255, 255, 0.8);
+      z-index: 2;
+    {% endunless %}
+  }
+
+  .ai-nutrition-facts-close-button-{{ ai_gen_id }}:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .ai-nutrition-facts-close-button-{{ ai_gen_id }} svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ai-nutrition-facts-image-container-{{ ai_gen_id }} {
+    text-align: center;
+  }
+
+  .ai-nutrition-facts-image-{{ ai_gen_id }} {
+    max-width: 100%;
+    height: auto;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .ai-nutrition-facts-no-image-{{ ai_gen_id }} {
+    text-align: center;
+    padding: 30px 15px;
+    color: {{ block.settings.modal_text_color }};
+    opacity: 0.7;
+  }
+
+  .ai-nutrition-facts-no-image-{{ ai_gen_id }} svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-nutrition-facts-modal-content-{{ ai_gen_id }} {
+      max-width: 95%;
+      padding: {{ block.settings.modal_padding | times: 0.8 }}px;
+    }
+
+    .ai-nutrition-facts-modal-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.modal_title_size | times: 0.9 }}px;
+    }
+
+    .ai-nutrition-facts-button-{{ ai_gen_id }} {
+      font-size: {{ block.settings.button_font_size | times: 0.9 }}px;
+      padding: {{ block.settings.button_padding | times: 0.8 }}px {{ block.settings.button_padding | times: 1.2 }}px;
+      width: {{ block.settings.button_width_mobile }}%;
+      min-height: {{ block.settings.button_min_height | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<nutrition-facts-modal-{{ ai_gen_id }} class="ai-nutrition-facts-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% liquid
+    assign nutrition_facts_metafield = product.metafields[block.settings.metafield_namespace][block.settings.metafield_key]
+  %}
+
+  {% if nutrition_facts_metafield != blank %}
+    <button 
+      class="ai-nutrition-facts-button-{{ ai_gen_id }}"
+      aria-label="View nutritional facts"
+      data-modal-trigger
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14,2 14,8 20,8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10,9 9,9 8,9"></polyline>
+      </svg>
+      {{ block.settings.button_text }}
+    </button>
+
+    <div class="ai-nutrition-facts-modal-{{ ai_gen_id }}" data-modal>
+      <div class="ai-nutrition-facts-modal-content-{{ ai_gen_id }}">
+        <div class="ai-nutrition-facts-modal-header-{{ ai_gen_id }}">
+          <h3 class="ai-nutrition-facts-modal-title-{{ ai_gen_id }}">{{ block.settings.modal_title }}</h3>
+          <button 
+            class="ai-nutrition-facts-close-button-{{ ai_gen_id }}"
+            aria-label="Close modal"
+            data-modal-close
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="ai-nutrition-facts-image-container-{{ ai_gen_id }}">
+          {% if nutrition_facts_metafield %}
+            <img 
+              src="{{ nutrition_facts_metafield | file_url }}"
+              alt="Nutritional facts for {{ product.title }}"
+              class="ai-nutrition-facts-image-{{ ai_gen_id }}"
+              loading="lazy"
+            >
+          {% else %}
+            <div class="ai-nutrition-facts-no-image-{{ ai_gen_id }}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21,15 16,10 5,21"></polyline>
+              </svg>
+              <p>No nutritional facts image available</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</nutrition-facts-modal-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class NutritionFactsModal{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.modal = null;
+        this.trigger = null;
+        this.closeButton = null;
+      }
+
+      connectedCallback() {
+        this.modal = this.querySelector('[data-modal]');
+        this.trigger = this.querySelector('[data-modal-trigger]');
+        this.closeButton = this.querySelector('[data-modal-close]');
+
+        if (this.trigger && this.modal) {
+          this.setupEventListeners();
+        }
+      }
+
+      setupEventListeners() {
+        this.trigger.addEventListener('click', () => this.openModal());
+        
+        if (this.closeButton) {
+          this.closeButton.addEventListener('click', () => this.closeModal());
+        }
+
+        this.modal.addEventListener('click', (e) => {
+          if (e.target === this.modal) {
+            this.closeModal();
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.modal.classList.contains('active')) {
+            this.closeModal();
+          }
+        });
+      }
+
+      openModal() {
+        this.modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        setTimeout(() => {
+          if (this.closeButton) {
+            this.closeButton.focus();
+          }
+        }, 300);
+      }
+
+      closeModal() {
+        this.modal.classList.remove('active');
+        document.body.style.overflow = '';
+        this.trigger.focus();
+      }
+    }
+
+    customElements.define('nutrition-facts-modal-{{ ai_gen_id }}', NutritionFactsModal{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Nutritional Facts Modal",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Metafield Configuration"
+    },
+    {
+      "type": "text",
+      "id": "metafield_namespace",
+      "label": "Metafield namespace",
+      "default": "custom"
+    },
+    {
+      "type": "text",
+      "id": "metafield_key",
+      "label": "Metafield key",
+      "default": "nutrition_facts"
+    },
+    {
+      "type": "header",
+      "content": "Container Settings"
+    },
+    {
+      "type": "range",
+      "id": "container_width",
+      "min": 100,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "label": "Container width",
+      "default": 200
+    },
+    {
+      "type": "select",
+      "id": "button_alignment",
+      "label": "Button alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Top margin",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom margin",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Nutrition Facts"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_icon",
+      "label": "Hide icon",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Icon size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_width",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Button width (desktop)",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "button_width_mobile",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Button width (mobile)",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "button_min_height",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Button minimum height",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button font size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_padding",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Button padding",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "label": "Button border radius",
+      "default": 4
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Button border color",
+      "default": "#dddddd"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_color",
+      "label": "Button hover background color",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Button hover text color",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Modal Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show modal title",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "modal_title",
+      "label": "Modal title",
+      "default": "Nutritional Facts"
+    },
+    {
+      "type": "range",
+      "id": "modal_title_size",
+      "min": 14,
+      "max": 28,
+      "step": 1,
+      "unit": "px",
+      "label": "Modal title size",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "modal_max_width",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Modal max width",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "modal_padding",
+      "min": 5,
+      "max": 30,
+      "step": 5,
+      "unit": "px",
+      "label": "Modal padding",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "modal_border_radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "label": "Modal border radius",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "modal_background",
+      "label": "Modal background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "modal_text_color",
+      "label": "Modal text color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "min": 0,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "label": "Image border radius",
+      "default": 4
+    }
+  ],
+  "presets": [
+    {
+      "name": "Nutritional Facts Modal"
+    }
+  ]
+}
+{% endschema %}

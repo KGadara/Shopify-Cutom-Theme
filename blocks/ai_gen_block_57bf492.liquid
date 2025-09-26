@@ -1,0 +1,1283 @@
+{% doc %}
+  @prompt
+    ‏We need a responsive and clean comparison table that shows the differences between two versions of a product/service. The design should be modern, mobile-friendly, and allow full customization.
+    
+    ⸻
+    
+    ‏✅ Table Layout
+    
+    ‏A vertical table with three columns:
+    
+    ‏Feature	Version A	Version B
+    ‏One-Time Payment	✅	❌
+    ‏1 Year of FREE Updates	✅	❌
+    ‏Unlimited Store Transfers	✅	❌
+    ‏Upgrade At Any Time	✅	❌
+    ‏Lightning-Fast Performance	✅	❌
+    ‏24/7 Support	✅	❌
+    
+    
+    ⸻
+    
+    ‏🎨 Design Requirements
+    ‏	•	The layout must be responsive on all devices (desktop, tablet, mobile).
+    ‏	•	Use rounded corners for a soft, modern appearance.
+    ‏	•	The overall look must be clean, minimal, and easy to read.
+    ‏	•	Use clear ✅ and ❌ icons for availability.
+    ‏	•	You can highlight one version column using a light background color if needed (optional).
+    ‏	•	The design should be fully customizable, including:
+    ‏	•	Fonts (type, size, weight)
+    ‏	•	Colors
+    ‏	•	Icons
+    ‏	•	Layout and spacing
+    ‏	•	The table should be built in a way that allows easy editing later (e.g., adding/removing features or columns)., Design Requirements
+    	•	Same clean and minimal design as shown in the reference image.
+    	•	Use the same color scheme:
+    	•	Light green (#E8F5E9 or similar) for “Us”
+    	•	Light red/pink (#FFEBEE or similar) for “Others”
+    	•	Table background should be white, and borders subtle or removed.
+    	•	Use modern, rounded corners (especially for outer edges).
+    	•	Font should be elegant, readable, and professional (like Inter, Poppins, or similar).
+    	•	Use bold headings for columns (e.g., “Features”, “Us”, “Others”).
+    	•	Add ✅ and ❌ icons inside the cells for clarity.
+    	•	Layout must be fully responsive on all screen sizes (mobile, tablet, desktop).
+    	•	Entire table should be fully customizable:
+    	•	Fonts
+    	•	Colors
+    	•	Icons
+    	•	Number of rows/features
+    	•	Optional: Slight shadow or separation if used inside a section to distinguish the table, Add an option to change the icons used for “available” and “not available” (e.g., allow replacing ✅ and ❌ with custom SVG icons or other symbols)., Add heading with ” Why Choose Us”
+
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-comparison-table-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .ai-comparison-table-heading-{{ ai_gen_id }} {
+    text-align: {{ block.settings.heading_alignment }};
+    margin-bottom: {{ block.settings.heading_bottom_spacing }}px;
+    font-family: {{ block.settings.heading_font_family.family }}, {{ block.settings.heading_font_family.fallback_families }};
+    font-size: {{ block.settings.heading_font_size }}px;
+    font-weight: {{ block.settings.heading_font_weight }};
+    color: {{ block.settings.heading_color }};
+    line-height: 1.2;
+  }
+
+  .ai-comparison-table-{{ ai_gen_id }} {
+    width: 100%;
+    font-family: {{ block.settings.font_family.family }}, {{ block.settings.font_family.fallback_families }};
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    background-color: {{ block.settings.table_background }};
+    {% if block.settings.show_shadow %}
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    {% endif %}
+    border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+  }
+
+  .ai-comparison-table-header-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    background-color: {{ block.settings.header_background }};
+  }
+
+  .ai-comparison-table-header-cell-{{ ai_gen_id }} {
+    padding: {{ block.settings.header_padding }}px;
+    text-align: center;
+    font-weight: {{ block.settings.header_font_weight }};
+    font-size: {{ block.settings.header_font_size }}px;
+    color: {{ block.settings.header_text_color }};
+    {% if block.settings.show_header_borders %}
+      border-right: 1px solid {{ block.settings.header_border_color }};
+    {% endif %}
+  }
+
+  .ai-comparison-table-header-cell-{{ ai_gen_id }}:last-child {
+    border-right: none;
+  }
+
+  .ai-comparison-table-header-cell-{{ ai_gen_id }}:first-child {
+    text-align: left;font-weight: {{ block.settings.feature_header_font_weight }};
+  }
+
+  .ai-comparison-table-us-header-{{ ai_gen_id }} {
+    background-color: {{ block.settings.us_header_background }};
+    color: {{ block.settings.us_header_text_color }};
+  }
+
+  .ai-comparison-table-others-header-{{ ai_gen_id }} {
+    background-color: {{ block.settings.others_header_background }};
+    color: {{ block.settings.others_header_text_color }};
+  }
+
+  .ai-comparison-table-body-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+  }
+
+  .ai-comparison-table-row-{{ ai_gen_id }} {
+    display: contents;
+  }
+
+  .ai-comparison-table-cell-{{ ai_gen_id }} {
+    padding: {{ block.settings.cell_padding }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: {{ block.settings.cell_min_height }}px;
+    font-size: {{ block.settings.body_font_size }}px;
+    {% if block.settings.show_row_borders %}
+      border-bottom: 1px solid {{ block.settings.row_border_color }};
+    {% endif %}{% if block.settings.show_column_borders %}
+      border-right: 1px solid {{ block.settings.column_border_color }};
+    {% endif %}
+  }
+
+  .ai-comparison-table-cell-{{ ai_gen_id }}:first-child {
+    justify-content: flex-start;
+    font-weight: {{ block.settings.feature_font_weight }};
+    color: {{ block.settings.feature_text_color }};
+    background-color: {{ block.settings.feature_background }};
+  }
+
+  .ai-comparison-table-cell-{{ ai_gen_id }}:nth-child(3n-1) {
+    background-color: {{ block.settings.us_background }};
+    color: {{ block.settings.us_text_color }};
+  }
+
+  .ai-comparison-table-cell-{{ ai_gen_id }}:nth-child(3n) {
+    background-color: {{ block.settings.others_background }};
+    color: {{ block.settings.others_text_color }};
+    border-right: none;
+  }
+
+  .ai-comparison-table-row-{{ ai_gen_id }}:last-child .ai-comparison-table-cell-{{ ai_gen_id }} {
+    border-bottom: none;
+  }
+
+  .ai-comparison-table-icon-{{ ai_gen_id }} {
+    font-size: {{ block.settings.icon_size }}px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-comparison-table-icon-yes-{{ ai_gen_id }} {
+    color: {{ block.settings.yes_icon_color }};
+  }
+
+  .ai-comparison-table-icon-no-{{ ai_gen_id }} {
+    color: {{ block.settings.no_icon_color }};
+  }
+
+  .ai-comparison-table-svg-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-comparison-table-svg-icon-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ai-comparison-table-svg-icon-yes-{{ ai_gen_id }} svg {
+    fill: {{ block.settings.yes_icon_color }};
+    stroke: {{ block.settings.yes_icon_color }};
+  }
+
+  .ai-comparison-table-svg-icon-no-{{ ai_gen_id }} svg {
+    fill: {{ block.settings.no_icon_color }};
+    stroke: {{ block.settings.no_icon_color }};
+  }
+
+  @media screen and (max-width: 768px) {
+    .ai-comparison-table-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.mobile_heading_font_size }}px;
+      margin-bottom: {{ block.settings.mobile_heading_bottom_spacing }}px;
+    }
+
+    .ai-comparison-table-{{ ai_gen_id }} {
+      border-radius: {{ block.settings.mobile_border_radius }}px;
+    }
+
+    .ai-comparison-table-header-{{ ai_gen_id }},
+    .ai-comparison-table-body-{{ ai_gen_id }} {
+      grid-template-columns: 1.8fr 1fr 1fr;
+    }
+
+    .ai-comparison-table-header-cell-{{ ai_gen_id }},
+    .ai-comparison-table-cell-{{ ai_gen_id }} {
+      padding: {{ block.settings.mobile_padding }}px;
+      min-height: {{ block.settings.mobile_cell_min_height }}px;
+    }
+
+    .ai-comparison-table-header-cell-{{ ai_gen_id }} {
+      font-size: {{ block.settings.mobile_header_font_size }}px;
+    }
+
+    .ai-comparison-table-cell-{{ ai_gen_id }} {
+      font-size: {{ block.settings.mobile_body_font_size }}px;
+    }
+
+    .ai-comparison-table-icon-{{ ai_gen_id }} {
+      font-size: {{ block.settings.mobile_icon_size }}px;
+    }
+
+    .ai-comparison-table-svg-icon-{{ ai_gen_id }} {
+      width: {{ block.settings.mobile_icon_size }}px;
+      height: {{ block.settings.mobile_icon_size }}px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .ai-comparison-table-heading-{{ ai_gen_id }} {
+      font-size: {{ block.settings.small_mobile_heading_font_size }}px;
+      margin-bottom: {{ block.settings.small_mobile_heading_bottom_spacing }}px;
+    }
+
+    .ai-comparison-table-header-{{ ai_gen_id }},
+    .ai-comparison-table-body-{{ ai_gen_id }} {
+      grid-template-columns: 1.5fr 1fr 1fr;
+    }
+
+    .ai-comparison-table-header-cell-{{ ai_gen_id }},
+    .ai-comparison-table-cell-{{ ai_gen_id }} {
+      padding: {{ block.settings.small_mobile_padding }}px;
+      min-height: {{ block.settings.small_mobile_cell_min_height }}px;
+    }
+
+    .ai-comparison-table-header-cell-{{ ai_gen_id }} {
+      font-size: {{ block.settings.small_mobile_header_font_size }}px;
+    }
+
+    .ai-comparison-table-cell-{{ ai_gen_id }} {
+      font-size: {{ block.settings.small_mobile_body_font_size }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-comparison-table-wrapper-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.show_heading and block.settings.heading_text != blank %}
+    <h2 class="ai-comparison-table-heading-{{ ai_gen_id }}">
+      {{ block.settings.heading_text }}
+    </h2>
+  {% endif %}
+
+  <div class="ai-comparison-table-{{ ai_gen_id }}">
+    <div class="ai-comparison-table-header-{{ ai_gen_id }}">
+      <div class="ai-comparison-table-header-cell-{{ ai_gen_id }}">
+        {{ block.settings.feature_header }}
+      </div>
+      <div class="ai-comparison-table-header-cell-{{ ai_gen_id }} ai-comparison-table-us-header-{{ ai_gen_id }}">
+        {{ block.settings.us_header }}
+      </div>
+      <div class="ai-comparison-table-header-cell-{{ ai_gen_id }} ai-comparison-table-others-header-{{ ai_gen_id }}">
+        {{ block.settings.others_header }}
+      </div>
+    </div>
+
+    <div class="ai-comparison-table-body-{{ ai_gen_id }}">
+      {% for i in (1..12) %}
+        {% assign feature_key = 'feature_' | append: i %}
+        {% assign us_key = 'feature_' | append: i | append: '_us' %}
+        {% assign others_key = 'feature_' | append: i | append: '_others' %}
+        {% assign feature_text = block.settings[feature_key] %}
+        {% assign us_value = block.settings[us_key] %}
+        {% assign others_value = block.settings[others_key] %}
+        
+        {% if feature_text != blank %}
+          <div class="ai-comparison-table-row-{{ ai_gen_id }}">
+            <div class="ai-comparison-table-cell-{{ ai_gen_id }}">
+              {{ feature_text }}
+            </div>
+            <div class="ai-comparison-table-cell-{{ ai_gen_id }}">
+              {% if us_value %}
+                {% if block.settings.icon_type == 'svg' %}
+                  <span class="ai-comparison-table-svg-icon-{{ ai_gen_id }} ai-comparison-table-svg-icon-yes-{{ ai_gen_id }}">
+                    {% if block.settings.yes_svg_icon == 'checkmark' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'check_circle' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'thumbs_up' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'star' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'custom' and block.settings.custom_yes_svg != blank %}
+                      {{ block.settings.custom_yes_svg }}
+                    {% else %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                      </svg>
+                    {% endif %}
+                  </span>
+                {% else %}
+                  <span class="ai-comparison-table-icon-{{ ai_gen_id }} ai-comparison-table-icon-yes-{{ ai_gen_id }}">
+                    {{ block.settings.yes_text_icon }}
+                  </span>
+                {% endif %}
+              {% else %}
+                {% if block.settings.icon_type == 'svg' %}
+                  <span class="ai-comparison-table-svg-icon-{{ ai_gen_id }} ai-comparison-table-svg-icon-no-{{ ai_gen_id }}">
+                    {% if block.settings.no_svg_icon == 'x_mark' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'x_circle' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'thumbs_down' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'minus' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'custom' and block.settings.custom_no_svg != blank %}
+                      {{ block.settings.custom_no_svg }}
+                    {% else %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    {% endif %}
+                  </span>
+                {% else %}
+                  <span class="ai-comparison-table-icon-{{ ai_gen_id }} ai-comparison-table-icon-no-{{ ai_gen_id }}">
+                    {{ block.settings.no_text_icon }}
+                  </span>
+                {% endif %}
+              {% endif %}
+            </div>
+            <div class="ai-comparison-table-cell-{{ ai_gen_id }}">
+              {% if others_value %}
+                {% if block.settings.icon_type == 'svg' %}
+                  <span class="ai-comparison-table-svg-icon-{{ ai_gen_id }} ai-comparison-table-svg-icon-yes-{{ ai_gen_id }}">
+                    {% if block.settings.yes_svg_icon == 'checkmark' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'check_circle' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'thumbs_up' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'star' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    {% elsif block.settings.yes_svg_icon == 'custom' and block.settings.custom_yes_svg != blank %}
+                      {{ block.settings.custom_yes_svg }}
+                    {% else %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20,6 9,17 4,12"></polyline>
+                      </svg>
+                    {% endif %}
+                  </span>
+                {% else %}
+                  <span class="ai-comparison-table-icon-{{ ai_gen_id }} ai-comparison-table-icon-yes-{{ ai_gen_id }}">
+                    {{ block.settings.yes_text_icon }}
+                  </span>
+                {% endif %}
+              {% else %}
+                {% if block.settings.icon_type == 'svg' %}
+                  <span class="ai-comparison-table-svg-icon-{{ ai_gen_id }} ai-comparison-table-svg-icon-no-{{ ai_gen_id }}">
+                    {% if block.settings.no_svg_icon == 'x_mark' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'x_circle' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'thumbs_down' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'minus' %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    {% elsif block.settings.no_svg_icon == 'custom' and block.settings.custom_no_svg != blank %}
+                      {{ block.settings.custom_no_svg }}
+                    {% else %}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    {% endif %}
+                  </span>
+                {% else %}
+                  <span class="ai-comparison-table-icon-{{ ai_gen_id }} ai-comparison-table-icon-no-{{ ai_gen_id }}">
+                    {{ block.settings.no_text_icon }}
+                  </span>
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Us vs Others Table",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading",
+      "label": "Show heading",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Heading text",
+      "default": "Why Choose Us"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font_family",
+      "label": "Heading font family",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 20,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Heading font weight",
+      "options": [
+        {"value": "500", "label": "Medium"},
+        {"value": "600", "label": "Semi-bold"},
+        {"value": "700", "label": "Bold"},
+        {"value": "800", "label": "Extra bold"}
+      ],
+      "default": "700"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {"value": "left", "label": "Left"},
+        {"value": "center", "label": "Center"},
+        {"value": "right", "label": "Right"}
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_bottom_spacing",
+      "label": "Spacing below heading",
+      "min": 16,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Table Headers"
+    },
+    {
+      "type": "text",
+      "id": "feature_header",
+      "label": "Feature column header",
+      "default": "Features"
+    },
+    {
+      "type": "text",
+      "id": "us_header",
+      "label": "Us column header",
+      "default": "Us"
+    },
+    {
+      "type": "text",
+      "id": "others_header",
+      "label": "Others column header",
+      "default": "Others"
+    },
+    {
+      "type": "header",
+      "content": "Features"
+    },
+    {
+      "type": "text",
+      "id": "feature_1",
+      "label": "Feature 1",
+      "default": "Lightning-Fast Performance"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_1_us",
+      "label": "Feature 1 - Us",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_1_others",
+      "label": "Feature 1 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_2",
+      "label": "Feature 2",
+      "default": "24/7 Premium Support"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_2_us",
+      "label": "Feature 2 - Us",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_2_others",
+      "label": "Feature 2 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_3",
+      "label": "Feature 3",
+      "default": "One-Time Payment"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_3_us",
+      "label": "Feature 3 - Us",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_3_others",
+      "label": "Feature 3 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_4",
+      "label": "Feature 4",
+      "default": "Unlimited Updates"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_4_us",
+      "label": "Feature 4 - Us",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_4_others",
+      "label": "Feature 4 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_5",
+      "label": "Feature 5",
+      "default": "Advanced Security"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_5_us",
+      "label": "Feature 5 - Us",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_5_others",
+      "label": "Feature 5 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_6",
+      "label": "Feature 6",
+      "default": "Mobile Optimized"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_6_us",
+      "label": "Feature 6 - Us",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_6_others",
+      "label": "Feature 6 - Others",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "feature_7",
+      "label": "Feature 7"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_7_us",
+      "label": "Feature 7 - Us",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_7_others",
+      "label": "Feature 7 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_8",
+      "label": "Feature 8"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_8_us",
+      "label": "Feature 8 - Us",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_8_others",
+      "label": "Feature 8 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_9",
+      "label": "Feature 9"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_9_us",
+      "label": "Feature 9 - Us",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_9_others",
+      "label": "Feature 9 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_10",
+      "label": "Feature 10"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_10_us",
+      "label": "Feature 10 - Us",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_10_others",
+      "label": "Feature 10 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_11",
+      "label": "Feature 11"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_11_us",
+      "label": "Feature 11 - Us",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_11_others",
+      "label": "Feature 11 - Others",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "feature_12",
+      "label": "Feature 12"
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_12_us",
+      "label": "Feature 12 - Us",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "feature_12_others",
+      "label": "Feature 12 - Others",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Icon Settings"
+    },
+    {
+      "type": "select",
+      "id": "icon_type",
+      "label": "Icon type",
+      "options": [
+        {
+          "value": "text",
+          "label": "Text/Emoji"
+        },
+        {
+          "value": "svg",
+          "label": "SVG Icons"
+        }
+      ],
+      "default": "text"
+    },
+    {
+      "type": "text",
+      "id": "yes_text_icon",
+      "label": "Available text/emoji",
+      "default": "✅"
+    },
+    {
+      "type": "text",
+      "id": "no_text_icon",
+      "label": "Not available text/emoji",
+      "default": "❌"
+    },
+    {
+      "type": "select",
+      "id": "yes_svg_icon",
+      "label": "Available SVG icon",
+      "options": [
+        {
+          "value": "checkmark",
+          "label": "Checkmark"
+        },
+        {
+          "value": "check_circle",
+          "label": "Check Circle"
+        },
+        {
+          "value": "thumbs_up",
+          "label": "Thumbs Up"
+        },
+        {
+          "value": "star",
+          "label": "Star"
+        },
+        {
+          "value": "custom",
+          "label": "Custom SVG"
+        }
+      ],
+      "default": "checkmark"
+    },
+    {
+      "type": "select",
+      "id": "no_svg_icon",
+      "label": "Not available SVG icon",
+      "options": [
+        {
+          "value": "x_mark",
+          "label": "X Mark"
+        },
+        {
+          "value": "x_circle",
+          "label": "X Circle"
+        },
+        {
+          "value": "thumbs_down",
+          "label": "Thumbs Down"
+        },
+        {
+          "value": "minus",
+          "label": "Minus"
+        },
+        {
+          "value": "custom",
+          "label": "Custom SVG"
+        }
+      ],
+      "default": "x_mark"
+    },
+    {
+      "type": "html",
+      "id": "custom_yes_svg",
+      "label": "Custom available SVG",
+      "info": "Paste your custom SVG code here. Only used when 'Custom SVG' is selected above."
+    },
+    {
+      "type": "html",
+      "id": "custom_no_svg",
+      "label": "Custom not available SVG",
+      "info": "Paste your custom SVG code here. Only used when 'Custom SVG' is selected above."
+    },
+    {
+      "type": "color",
+      "id": "yes_icon_color",
+      "label": "Available icon color",
+      "default": "#4caf50"
+    },
+    {
+      "type": "color",
+      "id": "no_icon_color",
+      "label": "Not available icon color",
+      "default": "#f44336"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "font_family",
+      "label": "Font family",
+      "default": "helvetica_n4"
+    },
+    {
+      "type": "range",
+      "id": "header_font_size",
+      "label": "Header font size",
+      "min": 14,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "body_font_size",
+      "label": "Body font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "header_font_weight",
+      "label": "Header font weight",
+      "options": [
+        {"value": "500", "label": "Medium"},
+        {"value": "600", "label": "Semi-bold"},
+        {"value": "700", "label": "Bold"}
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "feature_header_font_weight",
+      "label": "Feature header font weight",
+      "options": [
+        {"value": "500", "label": "Medium"},
+        {"value": "600", "label": "Semi-bold"},
+        {"value": "700", "label": "Bold"}
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "feature_font_weight",
+      "label": "Feature text font weight",
+      "options": [
+        {"value": "400", "label": "Normal"},
+        {"value": "500", "label": "Medium"},
+        {"value": "600", "label": "Semi-bold"}
+      ],
+      "default": "500"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "table_background",
+      "label": "Table background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "header_background",
+      "label": "Header background",
+      "default": "#f8f9fa"
+    },
+    {
+      "type": "color",
+      "id": "header_text_color",
+      "label": "Header text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "us_header_background",
+      "label": "Us header background",
+      "default": "#e8f5e8"
+    },
+    {
+      "type": "color",
+      "id": "us_header_text_color",
+      "label": "Us header text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "others_header_background",
+      "label": "Others header background",
+      "default": "#ffebee"
+    },
+    {
+      "type": "color",
+      "id": "others_header_text_color",
+      "label": "Others header text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "feature_background",
+      "label": "Feature column background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "feature_text_color",
+      "label": "Feature text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "us_background",
+      "label": "Us column background",
+      "default": "#e8f5e8"
+    },
+    {
+      "type": "color",
+      "id": "us_text_color",
+      "label": "Us column text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "others_background",
+      "label": "Others column background",
+      "default": "#ffebee"
+    },
+    {
+      "type": "color",
+      "id": "others_text_color",
+      "label": "Others column text color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shadow",
+      "label": "Show table shadow",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "header_padding",
+      "label": "Header padding",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "cell_padding",
+      "label": "Cell padding",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "cell_min_height",
+      "label": "Cell minimum height",
+      "min": 50,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 65
+    },
+    {
+      "type": "header",
+      "content": "Borders"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Table border width",
+      "min": 0,
+      "max": 3,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Table border color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_header_borders",
+      "label": "Show header borders",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "header_border_color",
+      "label": "Header border color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_row_borders",
+      "label": "Show row borders",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "row_border_color",
+      "label": "Row border color",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_column_borders",
+      "label": "Show column borders",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "column_border_color",
+      "label": "Column border color",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Settings"
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_font_size",
+      "label": "Mobile heading font size",
+      "min": 18,
+      "max": 36,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "mobile_heading_bottom_spacing",
+      "label": "Mobile spacing below heading",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "mobile_border_radius",
+      "label": "Mobile border radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "mobile_header_font_size",
+      "label": "Mobile header font size",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "mobile_body_font_size",
+      "label": "Mobile body font size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding",
+      "label": "Mobile padding",
+      "min": 8,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "mobile_cell_min_height",
+      "label": "Mobile cell minimum height",
+      "min": 40,
+      "max": 70,
+      "step": 5,
+      "unit": "px",
+      "default": 55
+    },
+    {
+      "type": "range",
+      "id": "mobile_icon_size",
+      "label": "Mobile icon size",
+      "min": 14,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "small_mobile_heading_font_size",
+      "label": "Small mobile heading font size",
+      "min": 16,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "small_mobile_heading_bottom_spacing",
+      "label": "Small mobile spacing below heading",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "small_mobile_header_font_size",
+      "label": "Small mobile header font size",
+      "min": 10,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "small_mobile_body_font_size",
+      "label": "Small mobile body font size",
+      "min": 9,
+      "max": 14,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "small_mobile_padding",
+      "label": "Small mobile padding",
+      "min": 6,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "small_mobile_cell_min_height",
+      "label": "Small mobile cell minimum height",
+      "min": 35,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 45
+    }
+  ],
+  "presets": [
+    {
+      "name": "Us vs Others Table"
+    }
+  ]
+}
+{% endschema %}

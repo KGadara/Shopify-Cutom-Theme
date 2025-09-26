@@ -1,0 +1,509 @@
+{% comment %}
+  Section: Product Launch Hero
+  - A high-converting hero section for new product launches.
+  - Features a two-column layout, countdown timer, and benefit blocks.
+  - Fully customizable via the Shopify Theme Customizer.
+{% endcomment %}
+
+<style>
+  :root {
+    --plh-background-color: {{ section.settings.background_color }};
+    --plh-text-color: {{ section.settings.text_color }};
+    --plh-heading-color: {{ section.settings.heading_color }};
+    --plh-button-background: {{ section.settings.button_background }};
+    --plh-button-text-color: {{ section.settings.button_text_color }};
+    --plh-timer-background: {{ section.settings.timer_background }};
+    --plh-timer-text-color: {{ section.settings.timer_text_color }};
+  }
+
+  .plh-section {
+    background-color: var(--plh-background-color);
+    color: var(--plh-text-color);
+    padding: 50px 20px;
+  }
+
+  .plh-section__container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: center;
+  }
+
+  @media (min-width: 768px) {
+    .plh-section__container {
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+    }
+    {% if section.settings.layout == 'image_right' %}
+      .plh-section__content {
+        order: -1;
+      }
+    {% endif %}
+  }
+
+  .plh-section__media {
+    position: relative;
+    padding-bottom: 100%; /* 1:1 Aspect Ratio */
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .plh-section__media img,
+  .plh-section__media iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .plh-section__content {
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .plh-section__content {
+      text-align: left;
+    }
+  }
+
+  .plh-section__preheading {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: var(--plh-heading-color);
+  }
+
+  .plh-section__heading {
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 15px 0;
+    color: var(--plh-heading-color);
+  }
+
+  .plh-section__subheading {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto 30px auto;
+  }
+
+  @media (min-width: 768px) {
+    .plh-section__subheading {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  .plh-section__benefits {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+
+  @media (min-width: 768px) {
+    .plh-section__benefits {
+      justify-content: flex-start;
+    }
+  }
+
+  .plh-section__benefit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .plh-section__benefit svg {
+    width: 32px;
+    height: 32px;
+    color: var(--plh-heading-color);
+  }
+
+  .plh-section__benefit-text {
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .plh-section__timer {
+    margin-bottom: 30px;
+  }
+
+  .plh-section__timer-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+
+  .plh-section__timer-grid {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    .plh-section__timer-grid {
+      justify-content: flex-start;
+    }
+  }
+
+  .plh-section__timer-box {
+    background-color: var(--plh-timer-background);
+    color: var(--plh-timer-text-color);
+    padding: 10px;
+    border-radius: 5px;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .plh-section__timer-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .plh-section__timer-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .plh-section__cta-button {
+    display: inline-block;
+    background-color: var(--plh-button-background);
+    color: var(--plh-button-text-color);
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .plh-section__cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  .plh-section__guarantee {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+</style>
+
+<div class="plh-section" data-section-id="{{ section.id }}">
+  <div class="plh-section__container">
+    <div class="plh-section__media">
+      {%- if section.settings.video_url != blank -%}
+        <iframe src="{{ section.settings.video_url }}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      {%- elsif section.settings.image != blank -%}
+        <img src="{{ section.settings.image | image_url: width: 1200 }}" alt="{{ section.settings.image.alt | escape }}" loading="lazy" width="600" height="600">
+      {%- else -%}
+        {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+      {%- endif -%}
+    </div>
+    <div class="plh-section__content">
+      {%- if section.settings.preheading != blank -%}
+        <p class="plh-section__preheading">{{ section.settings.preheading | escape }}</p>
+      {%- endif -%}
+
+      <h2 class="plh-section__heading">{{ section.settings.heading | escape }}</h2>
+
+      {%- if section.settings.subheading != blank -%}
+        <div class="plh-section__subheading">{{ section.settings.subheading }}</div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="plh-section__benefits">
+          {%- for block in section.blocks -%}
+            <div class="plh-section__benefit" {{ block.shopify_attributes }}>
+              {{ block.settings.icon_svg }}
+              <span class="plh-section__benefit-text">{{ block.settings.text | escape }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.show_timer -%}
+        <div class="plh-section__timer" data-countdown-timer data-end-date="{{ section.settings.timer_end_date }}">
+          <p class="plh-section__timer-title">{{ section.settings.timer_title | escape }}</p>
+          <div class="plh-section__timer-grid">
+            <div class="plh-section__timer-box"><span class="plh-section__timer-value" data-days>00</span><span class="plh-section__timer-label">Days</span></div>
+            <div class="plh-section__timer-box"><span class="plh-section__timer-value" data-hours>00</span><span class="plh-section__timer-label">Hours</span></div>
+            <div class="plh-section__timer-box"><span class="plh-section__timer-value" data-minutes>00</span><span class="plh-section__timer-label">Mins</span></div>
+            <div class="plh-section__timer-box"><span class="plh-section__timer-value" data-seconds>00</span><span class="plh-section__timer-label">Secs</span></div>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.button_text != blank and section.settings.button_link != blank -%}
+        <a href="{{ section.settings.button_link }}" class="plh-section__cta-button">
+          {{ section.settings.button_text | escape }}
+        </a>
+      {%- endif -%}
+
+      {%- if section.settings.guarantee_text != blank -%}
+        <p class="plh-section__guarantee">{{ section.settings.guarantee_text | escape }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+<script>
+  function initializeCountdown(section) {
+    const timerElement = section.querySelector('[data-countdown-timer]');
+    if (!timerElement) return;
+
+    const endDate = new Date(timerElement.dataset.endDate).getTime();
+    if (isNaN(endDate)) {
+      timerElement.style.display = 'none';
+      return;
+    }
+
+    const daysEl = timerElement.querySelector('[data-days]');
+    const hoursEl = timerElement.querySelector('[data-hours]');
+    const minutesEl = timerElement.querySelector('[data-minutes]');
+    const secondsEl = timerElement.querySelector('[data-seconds]');
+
+    let interval = window.countdownIntervals;
+    if(interval && interval['{{ section.id }}']) clearInterval(interval['{{ section.id }}']);
+
+    const updateTimer = () => {
+      const now = new Date().getTime();
+      const distance = endDate - now;
+
+      if (distance < 0) {
+        clearInterval(interval['{{ section.id }}']);
+        timerElement.style.display = 'none';
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      daysEl.textContent = String(days).padStart(2, '0');
+      hoursEl.textContent = String(hours).padStart(2, '0');
+      minutesEl.textContent = String(minutes).padStart(2, '0');
+      secondsEl.textContent = String(seconds).padStart(2, '0');
+    };
+
+    if(!window.countdownIntervals) window.countdownIntervals = {};
+    window.countdownIntervals['{{ section.id }}'] = setInterval(updateTimer, 1000);
+    updateTimer();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const section = document.querySelector('[data-section-id="{{ section.id }}"]');
+    initializeCountdown(section);
+  });
+
+  document.addEventListener('shopify:section:load', (event) => {
+    if (event.detail.sectionId === '{{ section.id }}') {
+      const section = event.target;
+      initializeCountdown(section);
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product Launch Hero",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout & Content"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Media Position",
+      "options": [
+        { "value": "image_left", "label": "Image Left, Text Right" },
+        { "value": "image_right", "label": "Image Right, Text Left" }
+      ],
+      "default": "image_left"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "video_url",
+      "label": "Video URL",
+      "info": "Replaces the image if used. Supports YouTube. Example: https://www.youtube.com/embed/your_video_id"
+    },
+    {
+      "type": "text",
+      "id": "preheading",
+      "label": "Pre-heading",
+      "default": "Limited Time Launch"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "The Future of [Your Product]"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>This is where you describe the core benefit of your new product in a compelling and concise way.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Call to Action"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Shop The Launch"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "text",
+      "id": "guarantee_text",
+      "label": "Guarantee Text",
+      "default": "✓ 30-Day Money-Back Guarantee"
+    },
+    {
+      "type": "header",
+      "content": "Countdown Timer"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_timer",
+      "label": "Show Countdown Timer",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "timer_title",
+      "label": "Timer Title",
+      "default": "Launch Offer Ends In:"
+    },
+    {
+      "type": "text",
+      "id": "timer_end_date",
+      "label": "Timer End Date & Time",
+      "info": "Format: YYYY-MM-DD HH:MM:SS (e.g., 2024-12-31 23:59:59)"
+    },
+    {
+      "type": "header",
+      "content": "Color Settings"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Color",
+      "default": "#121212"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Button Background",
+      "default": "#007bff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "timer_background",
+      "label": "Timer Box Background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "timer_text_color",
+      "label": "Timer Box Text Color",
+      "default": "#121212"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": "Icon SVG",
+          "info": "Find icons at heroicons.com. Copy the SVG code and paste here."
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Benefit"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Launch Hero",
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 2.18a14.98 14.98 0 00-2.17 5.89m12.48 8.48l-2.17-5.89m-12.48 5.89l2.17-5.89m6.16 12.12v-4.8m-5.84 7.38v-4.8m-3.35 3.35l-2.17-5.89M9 12.75l2.17-5.89m0 0l2.17 5.89m-2.17-5.89l-2.17 5.89m2.17-5.89L9 3.86m2.17 5.89l2.17 5.89m-4.34-11.78l2.17 5.89m-2.17-5.89l2.17-5.89m0 0l2.17 5.89m-2.17-5.89L9 3.86\" /></svg>",
+            "text": "New Tech"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z\" /></svg>",
+            "text": "Handcrafted"
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.696a4.5 4.5 0 016.364 0l-1.06 1.06a2.25 2.25 0 00-3.182 0l-1.06-1.06a4.5 4.5 0 010-6.364l1.06-1.06a2.25 2.25 0 000-3.182l-1.06-1.06a4.5 4.5 0 01-6.364 0l-1.06 1.06a2.25 2.25 0 00-3.182 0l-1.06 1.06a4.5 4.5 0 010 6.364l1.06 1.06a2.25 2.25 0 003.182 0l1.06-1.06z\" /></svg>",
+            "text": "Sustainable"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
